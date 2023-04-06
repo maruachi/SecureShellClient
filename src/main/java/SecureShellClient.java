@@ -15,7 +15,6 @@ public class SecureShellClient {
     public void run() {
         BufferedReader clientReader = IoUtils.toReader(System.in);
 
-        Socket socket = null;
         while (true) {
             try {
                 String sshLine = clientReader.readLine();
@@ -30,7 +29,7 @@ public class SecureShellClient {
                 String username = sshLineElement[2];
                 String password = sshLineElement[3];
 
-                socket = new Socket(ip, PORT);
+                final Socket socket = new Socket(ip, PORT);
 
                 Writer serverWriter = IoUtils.toWriter(socket.getOutputStream());
                 Writer clientWriter = IoUtils.toWriter(System.out);
@@ -38,7 +37,7 @@ public class SecureShellClient {
 
                 IoUtils.writeLine(serverWriter, username + " " + password);
 
-                Response response = Response.create(clientReader.readLine());
+                Response response = Response.create(serverReader.readLine());
 
                 if (Response.FAIL == response) {
                     String failMessage = clientReader.readLine();
@@ -48,6 +47,15 @@ public class SecureShellClient {
                 }
 
                 if (Response.OK == response) {
+                    Thread receiveHandlerThread = new Thread(() -> {
+                        try {
+                            IoUtils.transferAllByte(socket.getInputStream(), System.out);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    receiveHandlerThread.start();
+
                     try (SecureShell secureShell = new SecureShell(socket);) {
                         secureShell.run();
                     } catch (IOException ioException) {

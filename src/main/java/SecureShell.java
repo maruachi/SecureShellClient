@@ -25,7 +25,7 @@ public class SecureShell implements Closeable {
 //        responseHandlerThread.start();
 
         try {
-            IoUtils.transferAllByte(System.in, socket.getOutputStream());
+            IoUtils.transferLineByLine(System.in, socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }

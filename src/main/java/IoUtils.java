@@ -46,4 +46,21 @@ public class IoUtils {
             }
         }
     }
+
+    public static void transferLineByLine(InputStream in, OutputStream out) {
+        BufferedReader reader = IoUtils.toReader(in);
+        Writer writer = IoUtils.toWriter(out);
+
+        while (true) {
+            try {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                IoUtils.writeLine(writer, line);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
