@@ -15,6 +15,7 @@ public class SecureShellClient {
     public void run() {
         BufferedReader clientReader = IoUtils.toReader(System.in);
 
+
         while (true) {
             try {
                 String sshLine = clientReader.readLine();
@@ -40,7 +41,7 @@ public class SecureShellClient {
                 Response response = Response.create(serverReader.readLine());
 
                 if (Response.FAIL == response) {
-                    String failMessage = clientReader.readLine();
+                    String failMessage = serverReader.readLine();
                     IoUtils.writeLine(clientWriter, failMessage);
                     socket.close();
                     continue;
@@ -49,7 +50,7 @@ public class SecureShellClient {
                 if (Response.OK == response) {
                     Thread receiveHandlerThread = new Thread(() -> {
                         try {
-                            IoUtils.transferAllByte(socket.getInputStream(), System.out);
+                            IoUtils.receiveMessage(socket.getInputStream(), System.out);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
