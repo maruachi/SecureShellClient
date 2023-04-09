@@ -28,10 +28,11 @@ public class IoUtils {
         }
     }
 
-    public static void transferAllByte(InputStream in, OutputStream out) {
+    public static void receiveMessage(InputStream in, OutputStream out) {
         BufferedInputStream bis = new BufferedInputStream(in, BUFFER_SIZE);
         BufferedOutputStream bos = new BufferedOutputStream(out, BUFFER_SIZE);
 
+        byte[] newLineByte =  "\n".getBytes(ENCODING);
         byte[] buffer = new byte[BUFFER_SIZE];
         while (true) {
             try {
@@ -40,7 +41,13 @@ public class IoUtils {
                     bos.flush();
                     return;
                 }
+
                 bos.write(buffer,0,len);
+
+                if (bis.available() == 0) {
+                    bos.write(newLineByte);
+                    bos.flush();
+                }
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
